@@ -82,7 +82,7 @@ function [obj, idx] = parse(bytes, idx)
             [obj, idx] = parsebytes(len, bytes, idx+5);
         case 199 % ext8
             len = double(bytes(idx+1));
-            [obj, idx] = parseext(len, bytes, idx+1);
+            [obj, idx] = parseext(len, bytes, idx+2);
         case 200 % ext16
             len = double(bytes2scalar(bytes(idx+1:idx+2), 'uint16'));
             [obj, idx] = parseext(len, bytes, idx+3);
@@ -172,8 +172,8 @@ function [out, idx] = parsebytes(len, bytes, idx)
 end
 
 function [out, idx] = parseext(len, bytes, idx)
-    obj.type = bytes(idx);
-    obj.data = bytes(idx+1:idx+len);
+    out.type = bytes(idx);
+    out.data = bytes(idx+1:idx+len);
     idx = idx + len + 1;
 end
 
