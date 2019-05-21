@@ -1,6 +1,6 @@
-# A MessagePack implementation for Matlab
+# A MessagePack implementation for Matlab and Octave
 
-The code is written in pure Matlab, and has no dependencies beyond Matlab itself. It does not work in Octave, since Octave does not support `unicode2native` or `native2unicode`.
+The code is written in pure Matlab, and has no dependencies beyond Matlab itself. And it works in recent versions of Octave, too.
 
 The files in this repository are taken from [Transplant](https://github.com/bastibe/transplant).
 
