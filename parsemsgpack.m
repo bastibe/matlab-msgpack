@@ -1,7 +1,8 @@
 %PARSEMSGPACK parses a msgpack byte buffer into Matlab data structures
 % PARSEMSGPACK(BYTES)
 %    reads BYTES as msgpack data, and creates Matlab data structures
-%    from it.
+%    from it. The number of bytes consumed by the parsemsgpack call 
+%    is returned in the variable IDX.
 %    - strings are converted to strings
 %    - numbers are converted to appropriate numeric values
 %    - true, false are converted to logical 1, 0
