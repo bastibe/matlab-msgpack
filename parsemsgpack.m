@@ -7,8 +7,9 @@
 %    - numbers are converted to appropriate numeric values
 %    - true, false are converted to logical 1, 0
 %    - nil is converted to []
-%    - arrays are converted to cell arrays
-%    - maps are converted to containers.Map
+%    - arrays are converted to cell arrays, but converting to "normal" arrays is also possible. Look at "parsearray" and change commented lines if it suits your specific serialization.
+%    - maps are converted to structs, because in most of the cases this will be better that using containers.Map. Look at "parsemap" and change commented lines by convenience.
+%    - in case you have a specific mapping, you can add it to the function "replaceMsgPackKey".
 
 % (c) 2016 Bastian Bechtold
 % voluntary contributions made by Christopher Nadler (cnadler86)
@@ -177,26 +178,30 @@ function [out, idx] = parseext(len, bytes, idx)
 end
 
 function [out, idx] = parsearray(len, bytes, idx)
-    % out = cell(1, len);
-    % for n=1:len
-    %     [out{n}, idx] = parse(bytes, idx);
-    % end
-
-    % In most of the cases this is faster than using a preallocated cell (approach above). Array cannot be preallocated because the datatype is defined by the first call of the for loop.
-    % %Chosse how to manage arrays by commetinnig out/in.
+    out = cell(1, len);
     for n=1:len
-        [out(n), idx] = parse(bytes, idx); %#ok<AGROW>: still better than using a cell and preallocating
+        [out{n}, idx] = parse(bytes, idx);
     end
+
+    % In most of the cases the approach below is faster than using a preallocated cell (approach above), but its usage and speed depends on the specific serializatiion.
+    % Choose how to manage arrays by commenting out/in.
+    % Note: Array cannot be preallocated because the datatype is defined by the first call of the for loop).
+    
+%     for n=1:len
+%         [out(n), idx] = parse(bytes, idx); %#ok<AGROW>: still better than using a cell and preallocating
+%     end
 end
 
 function [out, idx] = parsemap(len, bytes, idx)
-    % out = containers.Map();
-    % for n=1:len
-    %     [key, idx] = parse(bytes, idx);
-    %     [out(key), idx] = parse(bytes, idx);
-    % end
+%     out = containers.Map();
+%     for n=1:len
+%         [key, idx] = parse(bytes, idx);
+%         [out(key), idx] = parse(bytes, idx);
+%     end
 
-    %Using struct in faster and more user friendly. 
+    % In most of the cases using struct is faster and more user friendly.
+    % Choose how to manage maps by commenting out/in.
+
     out = struct();
     for n=1:len
         [key, idx] = parse(bytes, idx);
@@ -205,26 +210,23 @@ function [out, idx] = parsemap(len, bytes, idx)
 end
 
 function ret = replaceMsgPackKey(num)
-    %add specific key names in here dependent on your specific msgpack serialisation.
-    %Always use uint8 in order to maintain performance.
+    % If needed dependent on your specific msgpack serialisation, add specific mapping for key-names in here.
+    % In this case use int8 / uint8 in the case statements in order to maintain performance (depending on the data type of num).
     % Example:
         % switch num
         %     case uint8(17)
         %         ret = 'data';
         %     case uint8(18)
         %         ret = 'numOfElems';
-        %     case uint8(19)
-        %         ret = 'elemSz';
-        %     case uint8(20)
-        %         ret = 'endian';
-        %     case uint8(21)
-        %         ret = 'elemTypes';
         %     case uint8(16)
         %         ret = 'class';
         % end
-
-    switch num
-        otherwise
-            ret = sprintf('Key%s',num);
+    if ischar(num) || isstring(num)
+        ret=matlab.lang.makeValidName(num);     %used in order to support most of the possible arbitrary field names.
+    else
+        switch num
+            otherwise
+                ret = sprintf('Key%s',num);
+        end
     end
 end

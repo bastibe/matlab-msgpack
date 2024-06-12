@@ -1,8 +1,8 @@
-# A MessagePack implementation for Matlab and Octave
+# A performant MessagePack implementation for Matlab and Octave
 
 The code is written in pure Matlab, and has no dependencies beyond Matlab itself. And it works in recent versions of Octave, too.
-
 The files in this repository are taken from [Transplant](https://github.com/bastibe/transplant).
+Parsemsgpack was adapted in order to improve performance and support also different ways of dealing with arrays and maps.
 
 ## Basic Usage:
 ```matlab
@@ -34,18 +34,19 @@ There is no way of encoding exts
 
 ## Converting MsgPack to Matlab
 
-| MsgPack        | Matlab         |
-| -------------- | -------------- |
-| string         | string         |
-| number         | scalar         |
-| `true`/`false` | logical        |
-| nil            | empty matrix   |
-| array          | cell array     |
-| map            | containers.Map |
-| bin            | uint8          |
-| ext            | uint8          |
+| MsgPack        | Matlab                    |
+| -------------- | ------------------------- |
+| string         | string                    |
+| number         | scalar                    |
+| `true`/`false` | logical                   |
+| nil            | empty matrix              |
+| array          | cell array / (array)      |
+| map            | struct / (containers.Map) |
+| bin            | uint8                     |
+| ext            | uint8                     |
 
-Note that since `structs` don't support arbitrary field names, they can't be used for representing `maps`. We use `containers.Map` instead.
+Note that since `structs` don't support arbitrary field names, the fields will not always fully represent the serialized `maps`.
+Take a look at `parsemap` and `replaceMsgPackKey ` in `parsemsgpack` for more information.
 
 ## Tests
  ```matlab
@@ -57,6 +58,7 @@ Note that since `structs` don't support arbitrary field names, they can't be use
 MATLAB (R) is copyright of the Mathworks
 
 Copyright (c) 2014 Bastian Bechtold
+Voluntary contributions made by Christopher Nadler (cnadler86)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

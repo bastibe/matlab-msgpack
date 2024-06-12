@@ -69,18 +69,43 @@ if any(parsemsgpack(uint8([198, 0, 1, 0, 0, ones(1, 2^16)*42])) ~= repmat(uint8(
 end
 
 %% array parsing
-c = parsemsgpack(uint8([146, 1, 2]));
-d = {uint8(1), uint8(2)};
-for n=1:max([length(c), length(d)])
-    if c{n} ~= d{n}
-        error('Parsing fixarray failed')
+try
+    %parse array as matlab cell
+    c = parsemsgpack(uint8([146, 1, 2]));
+    d = {uint8(1), uint8(2)};
+    for n=1:max([length(c), length(d)])
+        if c{n} ~= d{n}
+            error('Parsing fixarray failed')
+        end
+    end
+catch
+    %parse array as matlab array
+    c = parsemsgpack(uint8([146, 1, 2]));
+    d = [uint8(1), uint8(2)];
+    for n=1:max([length(c), length(d)])
+        if c(n) ~= d(n)
+            error('Parsing fixarray failed')
+        end
     end
 end
-c = parsemsgpack(uint8([220, 0, 16, repmat(42, [1, 16])]));
-d = num2cell(repmat(uint8(42), [1, 16]));
-for n=1:max([length(c), length(d)])
-    if c{n} ~= d{n}
-        error('Parsing array16 failed')
+
+try
+    %parse array as matlab cell
+    c = parsemsgpack(uint8([220, 0, 16, repmat(42, [1, 16])]));
+    d = num2cell(repmat(uint8(42), [1, 16]));
+    for n=1:max([length(c), length(d)])
+        if c{n} ~= d{n}
+            error('Parsing array16 failed')
+        end
+    end
+catch
+    %parse array as matlab array
+    c = parsemsgpack(uint8([220, 0, 16, repmat(42, [1, 16])]));
+    d = repmat(uint8(42), [1, 16]);
+    for n=1:max([length(c), length(d)])
+        if c(n) ~= d(n)
+            error('Parsing array16 failed')
+        end
     end
 end
 % array32 takes too long
@@ -88,10 +113,20 @@ end
 %% map parsing
 c = parsemsgpack(uint8([130, dumpmsgpack('one'), 1, dumpmsgpack('two'), 2]));
 d = struct('one', uint8(1), 'two', uint8(2));
-f = [fieldnames(d)' c.keys()];
+if isstruct(c)
+    f = [fieldnames(d)' fieldnames(c)'];
+else
+    f = [fieldnames(d)' c.keys()];
+end
 for n=1:length(f)
-    if c(f{n}) ~= d.(f{n})
-        error('Parsing fixmap failed')
+    if isstruct(c)
+        if c.(f{n}) ~= d.(f{n})
+            error('Parsing fixmap failed')
+        end
+    else
+        if c(f{n}) ~= d.(f{n})
+            error('Parsing fixmap failed')
+        end
     end
 end
 data = struct();
@@ -102,10 +137,20 @@ for n=[1 10 11 12 13 14 15 16 2 3 4 5 6 7 8 9] % default struct field order
 end
 c = parsemsgpack(msgpack);
 d = data;
-f = [fieldnames(d)' c.keys()];
+if isstruct(c)
+    f = [fieldnames(d)' fieldnames(c)'];
+else
+    f = [fieldnames(d)' c.keys()];
+end
 for n=1:length(f)
-    if c(f{n}) ~= d.(f{n})
-        error('Parsing map16 failed')
+    if isstruct(c)
+        if c.(f{n}) ~= d.(f{n})
+            error('Parsing fixmap failed')
+        end
+    else
+        if c(f{n}) ~= d.(f{n})
+            error('Parsing map16 failed')
+        end
     end
 end
 % map32 takes too long
