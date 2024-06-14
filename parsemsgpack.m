@@ -196,7 +196,7 @@ function [out, idx] = parsemap(len, bytes, idx)
 %     out = containers.Map();
 %     for n=1:len
 %         [key, idx] = parse(bytes, idx);
-%         [out(key), idx] = parse(bytes, idx);
+%         [out(string(key)), idx] = parse(bytes, idx);
 %     end
 
     % In most of the cases using struct is faster and more user friendly.
@@ -210,7 +210,7 @@ function [out, idx] = parsemap(len, bytes, idx)
 end
 
 function ret = replaceMsgPackKey(num)
-    % If needed dependent on your specific msgpack serialisation, add specific mapping for key-names in here.
+    % If needed, dependent on your specific msgpack serialisation, add specific mapping for key-names in here.
     % In this case use int8 / uint8 in the case statements in order to maintain performance (depending on the data type of num).
     % Example:
         % switch num
@@ -222,11 +222,17 @@ function ret = replaceMsgPackKey(num)
         %         ret = 'class';
         % end
     if ischar(num) || isstring(num)
-        ret=matlab.lang.makeValidName(num);     %used in order to support most of the possible arbitrary field names.
-    else
+        if isvarname(num)
+            ret=num;
+        else
+            ret=matlab.lang.makeValidName(num);     %used in order to support most of the possible arbitrary field names.
+        end
+    elseif isnumeric(num)
         switch num
             otherwise
-                ret = sprintf('Key%s',num);
+                ret = strrep(sprintf('Key%d',num),'-','_');
         end
+    else
+        ret=matlab.lang.makeValidName(string(num));
     end
 end
