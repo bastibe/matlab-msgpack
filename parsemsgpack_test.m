@@ -133,7 +133,7 @@ data = struct();
 msgpack = uint8([222, 0, 16]);
 for n=[1 10 11 12 13 14 15 16 2 3 4 5 6 7 8 9] % default struct field order
     data.(['x' num2str(n)]) = uint8(n);
-    msgpack = [msgpack dumpmsgpack(['x' num2str(n)]) uint8(n)];
+    msgpack = [msgpack dumpmsgpack(['x' num2str(n)]) uint8(n)]; %#ok<AGROW> 
 end
 c = parsemsgpack(msgpack);
 d = data;

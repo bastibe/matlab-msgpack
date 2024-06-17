@@ -2,7 +2,7 @@
 
 The code is written in pure Matlab, and has no dependencies beyond Matlab itself. And it works in recent versions of Octave, too.
 The files in this repository are taken from [Transplant](https://github.com/bastibe/transplant).
-Parsemsgpack was adapted in order to improve performance and support also different ways of dealing with arrays and maps.
+Parsemsgpack was adapted in order to improve performance and support also different ways of dealing with arrays and maps (usage may also boot performace even more). See the code for more information.
 
 ## Basic Usage:
 ```matlab
@@ -41,7 +41,7 @@ There is no way of encoding exts
 | `true`/`false` | logical                   |
 | nil            | empty matrix              |
 | array          | cell array / (array)      |
-| map            | struct / (containers.Map) |
+| map            | containers.Map / (struct) |
 | bin            | uint8                     |
 | ext            | uint8                     |
 

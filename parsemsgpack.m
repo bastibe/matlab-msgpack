@@ -3,13 +3,14 @@
 %    reads BYTES as msgpack data, and creates Matlab data structures
 %    from it. The number of bytes consumed by the parsemsgpack call 
 %    is returned in the variable IDX.
-%    - strings are converted to strings
-%    - numbers are converted to appropriate numeric values
-%    - true, false are converted to logical 1, 0
-%    - nil is converted to []
-%    - arrays are converted to cell arrays, but converting to "normal" arrays is also possible. Look at "parsearray" and change commented lines if it suits your specific serialization.
-%    - maps are converted to structs, because in most of the cases this will be better that using containers.Map. Look at "parsemap" and change commented lines by convenience.
-%    - in case you have a specific mapping, you can add it to the function "replaceMsgPackKey".
+%    - Strings are converted to strings.
+%    - Numbers are converted to appropriate numeric values.
+%    - True, false are converted to logical 1, 0.
+%    - Nil is converted to [].
+%    - Arrays are converted to cell arrays, but converting to "normal" arrays is also possible and probably faster.
+%      Look at "parsearray" and change commented lines if it suits your specific serialization.
+%    - Maps are converted to containers.Map, but converting to struct is also possible and faster. Look at "parsemap" and change commented lines by convenience.
+%      In case you have a specific mapping, you can add it to the function "replaceMsgPackKey" when using the structs implementation.
 
 % (c) 2016 Bastian Bechtold
 % voluntary contributions made by Christopher Nadler (cnadler86)
@@ -193,25 +194,25 @@ function [out, idx] = parsearray(len, bytes, idx)
 end
 
 function [out, idx] = parsemap(len, bytes, idx)
-%     out = containers.Map();
-%     for n=1:len
-%         [key, idx] = parse(bytes, idx);
-%         [out(string(key)), idx] = parse(bytes, idx);
-%     end
-
-    % In most of the cases using struct is faster and more user friendly.
-    % Choose how to manage maps by commenting out/in.
-
-    out = struct();
+    out = containers.Map();
     for n=1:len
         [key, idx] = parse(bytes, idx);
-        [out.(replaceMsgPackKey(key)), idx] = parse(bytes, idx);
+        [out(string(key)), idx] = parse(bytes, idx);
     end
+
+%     % In most of the cases using struct is faster and more user friendly, but it is not MsgPack-standard compliant.
+%     % Choose how to manage maps by commenting out/in.
+%     out = struct();
+%     for n=1:len
+%         [key, idx] = parse(bytes, idx);
+%         [out.(replaceMsgPackKey(key)), idx] = parse(bytes, idx);
+%     end
 end
 
 function ret = replaceMsgPackKey(num)
     % If needed, dependent on your specific msgpack serialisation, add specific mapping for key-names in here.
-    % In this case use int8 / uint8 in the case statements in order to maintain performance (depending on the data type of num).
+    % This function is only a standard default implementation that might need to be adapted for your needs.
+    % In case of usage, use int8 / uint8 in the case statements in order to maintain performance (depending on the data type of num).
     % Example:
         % switch num
         %     case uint8(17)
@@ -225,7 +226,7 @@ function ret = replaceMsgPackKey(num)
         if isvarname(num)
             ret=num;
         else
-            ret=matlab.lang.makeValidName(num);     %used in order to support most of the possible arbitrary field names.
+            ret=matlab.lang.makeValidName(num);     %used in order to support possible arbitrary field names.
         end
     elseif isnumeric(num)
         switch num
