@@ -177,54 +177,16 @@ function [out, idx] = parseext(len, bytes, idx)
 end
 
 function [out, idx] = parsearray(len, bytes, idx)
-    % out = cell(1, len);
-    % for n=1:len
-    %     [out{n}, idx] = parse(bytes, idx);
-    % end
-
-    % In most of the cases this is faster than using a preallocated cell (approach above). Array cannot be preallocated because the datatype is defined by the first call of the for loop.
-    % %Chosse how to manage arrays by commetinnig out/in.
+    out = cell(1, len);
     for n=1:len
-        [out(n), idx] = parse(bytes, idx); %#ok<AGROW>: still better than using a cell and preallocating
+        [out{n}, idx] = parse(bytes, idx);
     end
 end
 
 function [out, idx] = parsemap(len, bytes, idx)
-    % out = containers.Map();
-    % for n=1:len
-    %     [key, idx] = parse(bytes, idx);
-    %     [out(key), idx] = parse(bytes, idx);
-    % end
-
-    %Using struct in faster and more user friendly. 
-    out = struct();
+    out = containers.Map();
     for n=1:len
         [key, idx] = parse(bytes, idx);
-        [out.(replaceMsgPackKey(key)), idx] = parse(bytes, idx);
-    end
-end
-
-function ret = replaceMsgPackKey(num)
-    %add specific key names in here dependent on your specific msgpack serialisation.
-    %Always use uint8 in order to maintain performance.
-    % Example:
-        % switch num
-        %     case uint8(17)
-        %         ret = 'data';
-        %     case uint8(18)
-        %         ret = 'numOfElems';
-        %     case uint8(19)
-        %         ret = 'elemSz';
-        %     case uint8(20)
-        %         ret = 'endian';
-        %     case uint8(21)
-        %         ret = 'elemTypes';
-        %     case uint8(16)
-        %         ret = 'class';
-        % end
-
-    switch num
-        otherwise
-            ret = sprintf('Key%s',num);
+        [out(key), idx] = parse(bytes, idx);
     end
 end
