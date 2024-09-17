@@ -63,7 +63,6 @@ function [obj, idx] = parse(bytes, idx)
         case uint8(192) % nil
             obj = [];
             idx = idx+1;
-      % case uint8(193 % unused
         case uint8(194) % false
             obj = false;
             idx = idx+1;
