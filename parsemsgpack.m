@@ -34,7 +34,7 @@ function [obj, idx] = parse(bytes, idx)
 
     if bitand(b10000000, currentbyte) == b00000000
         % decode positive fixint
-        obj = int8(currentbyte);   %if you need more performance you could try to use uint8 instead of int here
+        obj = uint8(currentbyte);
         idx = idx + 1;
         return
     elseif bitand(b11100000, currentbyte) == b11100000
